@@ -5,15 +5,23 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/sqlite3store"
+	"github.com/alexedwards/scs/v2"
 	"github.com/charmbracelet/log"
+	"github.com/go-playground/form/v4"
 	"github.com/truby4/go-fasting/internal/api"
+	"github.com/truby4/go-fasting/internal/auth"
 	"github.com/truby4/go-fasting/internal/store"
 	"github.com/truby4/go-fasting/internal/web"
 )
 
 type Application struct {
-	Logger *log.Logger
-	store  *store.Store
+	Logger         *log.Logger
+	store          *store.Store
+	formDecoder    *form.Decoder
+	sessionManager *scs.SessionManager
+
+	auth *auth.Service
 
 	web *web.Handler
 	api *api.Handler
@@ -27,7 +35,19 @@ func New() (*Application, error) {
 		return nil, err
 	}
 
-	web, err := web.NewHandler(logger, store)
+	formDecoder := form.NewDecoder()
+
+	sessionManager := scs.New()
+	sessionManager.Store = sqlite3store.New(store.DB)
+	sessionManager.Lifetime = 12 * time.Hour
+
+	auth, err := auth.New(logger, store.Users)
+	if err != nil {
+		store.Close()
+		return nil, err
+	}
+
+	web, err := web.NewHandler(logger, formDecoder, &auth, sessionManager)
 	if err != nil {
 		store.Close()
 		return nil, err
@@ -40,10 +60,12 @@ func New() (*Application, error) {
 	}
 
 	return &Application{
-		Logger: logger,
-		web:    web,
-		api:    api,
-		store:  store,
+		Logger:         logger,
+		web:            web,
+		api:            api,
+		store:          store,
+		formDecoder:    formDecoder,
+		sessionManager: sessionManager,
 	}, nil
 }
 

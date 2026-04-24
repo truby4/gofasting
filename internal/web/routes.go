@@ -11,5 +11,13 @@ func (h *Handler) Routes() http.Handler {
 
 	r.Get("/", h.home)
 
+	r.Get("/signin", h.signin)
+	r.Post("/signin", h.signinPost)
+
+	r.Get("/signup", h.signup)
+	r.Post("/signup", h.signupPost)
+
+	r.Post("/signout", h.signoutPost)
+
 	return r
 }

@@ -1,0 +1,74 @@
+{{define "title"}}Sign in{{end}} {{define "main"}}
+<section class="py-3">
+    <h1 class="display-4 mb-2">Sign in</h1>
+    <p class="lead mb-4">
+        Pick up where you left off. Track your current fast,
+        review your history, and keep your streak going.
+    </p>
+
+    <form
+        action="/signin"
+        method="POST"
+        novalidate
+        class="mt-6 space-y-5"
+    >
+        <div class="form-floating mb-3">
+            <input
+                type="email"
+                class="form-control {{with .Form.FieldErrors.email}}is-invalid{{end}}"
+                id="email"
+                name="email"
+                value="{{.Form.Email}}"
+                placeholder="you@example.com"
+                required
+            />
+            <label for="email">Email address</label>
+            {{with .Form.FieldErrors.email}}
+            <div class="invalid-feedback">{{.}}</div>
+            {{end}}
+        </div>
+
+        <div class="form-floating mb-3">
+            <input
+                type="password"
+                class="form-control {{with .Form.FieldErrors.password}}is-invalid{{end}}"
+                id="password"
+                name="password"
+                value="{{.Form.Password}}"
+                placeholder="Create a password"
+                autocomplete="new-password"
+                required
+            />
+            <label for="password" class="form-label"
+                >Password</label
+            >
+            {{with .Form.FieldErrors.password}}
+            <div class="invalid-feedback">{{.}}</div>
+            {{end}}
+        </div>
+
+        <div class="form-check">
+            <input
+                class="form-check-input"
+                type="checkbox"
+                value="1"
+                id="remember"
+                name="remember"
+            />
+            <label
+                class="form-check-label text-muted"
+                for="remember"
+            >
+                Keep me signed in
+            </label>
+        </div>
+
+        <button
+            class="btn btn-primary px-3 my-3"
+            type="submit"
+        >
+            Log in
+        </button>
+    </form>
+</section>
+{{end}}

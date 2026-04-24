@@ -1,0 +1,67 @@
+{{define "title"}}Create Account{{end}} {{define "main"}}
+<section class="py-3">
+    <h1 class="display-4 mb-2">Create account</h1>
+    <p class="lead mb-4">
+        Start tracking your fasts, build consistency, and
+        see your progress over time.
+    </p>
+
+    <form
+        action="/signup"
+        method="POST"
+        novalidate
+        class="mt-6 space-y-5"
+    >
+        <div class="form-floating mb-3">
+            <input
+                type="email"
+                class="form-control {{with .Form.FieldErrors.email}}is-invalid{{end}}"
+                id="email"
+                name="email"
+                value="{{.Form.Email}}"
+                placeholder="you@example.com"
+                required
+            />
+            <label for="email">Email address</label>
+            {{with .Form.FieldErrors.email}}
+            <div class="invalid-feedback">{{.}}</div>
+            {{end}}
+        </div>
+
+        <div class="form-floating mb-3">
+            <input
+                type="password"
+                class="form-control {{with .Form.FieldErrors.password}}is-invalid{{end}}"
+                id="password"
+                name="password"
+                value="{{.Form.Password}}"
+                placeholder="Create a password"
+                autocomplete="new-password"
+                required
+            />
+            <label for="password" class="form-label"
+                >Password</label
+            >
+            {{with .Form.FieldErrors.password}}
+            <div class="invalid-feedback">{{.}}</div>
+            {{end}}
+        </div>
+
+        <button
+            class="btn btn-primary px-3 my-3"
+            type="submit"
+        >
+            Create account
+        </button>
+
+        <p class="text-muted mb-0">
+            Already have an account?
+            <a
+                href="/user/login"
+                class="text-decoration-none"
+                >Sign in</a
+            >
+        </p>
+    </form>
+</section>
+{{end}}

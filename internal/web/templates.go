@@ -8,9 +8,16 @@ import (
 	"path/filepath"
 )
 
-type templateCache struct{}
+type templateData struct {
+	Form            any
+	IsAuthenticated bool
+}
 
-type templateData struct{}
+func (h *Handler) newTemplateData(r *http.Request) templateData {
+	return templateData{
+		IsAuthenticated: h.isAuthenticated(r),
+	}
+}
 
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}

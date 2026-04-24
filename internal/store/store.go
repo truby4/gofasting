@@ -10,6 +10,7 @@ type Store struct {
 	DB     *sql.DB
 	logger *log.Logger
 	Fasts  *FastStore
+	Users  *UserStore
 }
 
 func New(logger *log.Logger) (*Store, error) {
@@ -22,9 +23,14 @@ func New(logger *log.Logger) (*Store, error) {
 		DB:     db,
 		logger: logger.WithPrefix("STORE"),
 		Fasts:  &FastStore{DB: db},
+		Users:  &UserStore{DB: db},
 	}, nil
 }
 
 func (s *Store) Close() error {
 	return s.DB.Close()
+}
+
+type scanner interface {
+	Scan(dest ...any) error
 }

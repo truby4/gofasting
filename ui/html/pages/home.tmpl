@@ -1,3 +1,15 @@
 {{define "title"}}Home{{end}} {{define "main"}}
 <h1>Main Content on Home Page</h1>
-{{end}}
+{{if .IsAuthenticated}}
+<form action="/signout" method="POST" class="d-inline">
+    <button type="submit" class="nav-link btn btn-link p-0">
+        Logout
+    </button>
+</form>
+{{else}}
+<a href="/signin"
+    ><button type="button" class="btn btn-link">
+        Sign in
+    </button></a
+>
+{{end}} {{end}}
