@@ -7,24 +7,44 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/truby4/go-fasting/internal/api"
+	"github.com/truby4/go-fasting/internal/store"
 	"github.com/truby4/go-fasting/internal/web"
 )
 
 type Application struct {
 	Logger *log.Logger
+	store  *store.Store
 
 	web *web.Handler
 	api *api.Handler
 }
 
-func New() Application {
+func New() (*Application, error) {
 	logger := log.NewWithOptions(os.Stderr, log.Options{ReportTimestamp: true})
 
-	return Application{
-		Logger: logger,
-		web:    web.NewHandler(logger),
-		api:    api.NewHandler(logger),
+	store, err := store.New(logger)
+	if err != nil {
+		return nil, err
 	}
+
+	web, err := web.NewHandler(logger, store)
+	if err != nil {
+		store.Close()
+		return nil, err
+	}
+
+	api, err := api.NewHandler(logger, store)
+	if err != nil {
+		store.Close()
+		return nil, err
+	}
+
+	return &Application{
+		Logger: logger,
+		web:    web,
+		api:    api,
+		store:  store,
+	}, nil
 }
 
 func (app *Application) Serve(addr string) error {
@@ -40,4 +60,8 @@ func (app *Application) Serve(addr string) error {
 
 	err := srv.ListenAndServe()
 	return err
+}
+
+func (app *Application) Close() error {
+	return app.store.Close()
 }
