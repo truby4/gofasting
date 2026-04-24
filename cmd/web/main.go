@@ -1,11 +1,19 @@
 package main
 
-import "net/http"
+import (
+	"flag"
+	"os"
+
+	"github.com/truby4/go-fasting/internal/app"
+)
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World"))
-	})
+	addr := flag.String("addr", ":4000", "HTTP network address")
+	flag.Parse()
 
-	http.ListenAndServe(":4040", nil)
+	app := app.New()
+
+	err := app.Serve(*addr)
+	app.Logger.Error(err.Error())
+	os.Exit(1)
 }
