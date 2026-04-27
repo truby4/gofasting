@@ -1,18 +1,13 @@
 package api
 
-import (
-	"github.com/charmbracelet/log"
-	"github.com/truby4/go-fasting/internal/store"
-)
+import "log/slog"
 
 type Handler struct {
-	logger *log.Logger
-	store  *store.Store
+	logger *slog.Logger
 }
 
-func NewHandler(logger *log.Logger, store *store.Store) (*Handler, error) {
+func NewHandler(logger *slog.Logger) (*Handler, error) {
 	return &Handler{
-		logger: logger.WithPrefix("API"),
-		store:  store,
+		logger: logger.With("component", "API"),
 	}, nil
 }

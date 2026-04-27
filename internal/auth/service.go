@@ -1,18 +1,69 @@
 package auth
 
 import (
-	"github.com/charmbracelet/log"
-	"github.com/truby4/go-fasting/internal/store"
+	"database/sql"
+	"errors"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Service struct {
-	logger *log.Logger
-	store  *store.UserStore
+	store store
 }
 
-func New(logger *log.Logger, store *store.UserStore) (Service, error) {
-	return Service{
-		logger: logger,
-		store:  store,
-	}, nil
+func New(db *sql.DB) *Service {
+	return &Service{
+		store: store{
+			db: db,
+		},
+	}
+}
+
+func (s *Service) Authenticate(email, password string) (int, error) {
+	input := input{
+		Email:    email,
+		Password: password,
+	}
+
+	err := input.validateInput()
+	if err != nil {
+		return 0, err
+	}
+
+	u, err := s.store.getByEmail(email)
+	if err != nil {
+		if errors.Is(err, ErrNoRecordFound) {
+			return 0, ErrInvalidCredentials
+		}
+		return 0, err
+	}
+
+	err = bcrypt.CompareHashAndPassword(u.HashedPassword, []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, ErrInvalidCredentials
+		}
+		return 0, err
+	}
+
+	return u.ID, nil
+}
+
+func (s *Service) Register(email, password string) error {
+	input := input{
+		Email:    email,
+		Password: password,
+	}
+
+	err := input.validateInput()
+	if err != nil {
+		return err
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+
+	return s.store.create(email, hashedPassword)
 }

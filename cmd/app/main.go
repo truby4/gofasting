@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/truby4/go-fasting/internal/app"
+	"github.com/truby4/gofasting/internal/app"
 )
 
 func main() {

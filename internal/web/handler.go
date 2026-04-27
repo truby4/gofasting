@@ -2,15 +2,15 @@ package web
 
 import (
 	"html/template"
+	"log/slog"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/charmbracelet/log"
 	"github.com/go-playground/form/v4"
-	"github.com/truby4/go-fasting/internal/auth"
+	"github.com/truby4/gofasting/internal/auth"
 )
 
 type Handler struct {
-	logger         *log.Logger
+	logger         *slog.Logger
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	auth           *auth.Service
@@ -18,7 +18,7 @@ type Handler struct {
 }
 
 func NewHandler(
-	logger *log.Logger,
+	logger *slog.Logger,
 	formDecoder *form.Decoder,
 	auth *auth.Service,
 	sessionManager *scs.SessionManager,
@@ -28,7 +28,7 @@ func NewHandler(
 		return nil, err
 	}
 	return &Handler{
-		logger:         logger.WithPrefix("WEB"),
+		logger:         logger.With("component", "WEB"),
 		templateCache:  tc,
 		formDecoder:    formDecoder,
 		auth:           auth,

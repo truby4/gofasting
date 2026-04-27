@@ -1,36 +1,35 @@
 package app
 
 import (
+	"database/sql"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
-	"github.com/charmbracelet/log"
 	"github.com/go-playground/form/v4"
-	"github.com/truby4/go-fasting/internal/api"
-	"github.com/truby4/go-fasting/internal/auth"
-	"github.com/truby4/go-fasting/internal/store"
-	"github.com/truby4/go-fasting/internal/web"
+	"github.com/truby4/gofasting/internal/api"
+	"github.com/truby4/gofasting/internal/auth"
+	"github.com/truby4/gofasting/internal/web"
 )
 
 type Application struct {
-	Logger         *log.Logger
-	store          *store.Store
+	Logger         *slog.Logger
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
-
-	auth *auth.Service
+	db             *sql.DB
+	auth           *auth.Service
 
 	web *web.Handler
 	api *api.Handler
 }
 
 func New() (*Application, error) {
-	logger := log.NewWithOptions(os.Stderr, log.Options{ReportTimestamp: true})
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	store, err := store.New(logger)
+	db, err := openDB()
 	if err != nil {
 		return nil, err
 	}
@@ -38,24 +37,18 @@ func New() (*Application, error) {
 	formDecoder := form.NewDecoder()
 
 	sessionManager := scs.New()
-	sessionManager.Store = sqlite3store.New(store.DB)
+	sessionManager.Store = sqlite3store.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
 
-	auth, err := auth.New(logger, store.Users)
+	auth := auth.New(db)
+
+	web, err := web.NewHandler(logger, formDecoder, auth, sessionManager)
 	if err != nil {
-		store.Close()
 		return nil, err
 	}
 
-	web, err := web.NewHandler(logger, formDecoder, &auth, sessionManager)
+	api, err := api.NewHandler(logger)
 	if err != nil {
-		store.Close()
-		return nil, err
-	}
-
-	api, err := api.NewHandler(logger, store)
-	if err != nil {
-		store.Close()
 		return nil, err
 	}
 
@@ -63,21 +56,19 @@ func New() (*Application, error) {
 		Logger:         logger,
 		web:            web,
 		api:            api,
-		store:          store,
-		formDecoder:    formDecoder,
 		sessionManager: sessionManager,
+		db:             db,
 	}, nil
 }
 
 func (app *Application) Serve(addr string) error {
-	app.Logger.Infof("Starting server on localhost %s", addr)
+	app.Logger.Info("Starting server", "addr", addr)
 	srv := &http.Server{
 		Addr:         addr,
 		Handler:      app.Routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		ErrorLog:     app.Logger.StandardLog(log.StandardLogOptions{ForceLevel: log.ErrorLevel}),
 	}
 
 	err := srv.ListenAndServe()
@@ -85,5 +76,5 @@ func (app *Application) Serve(addr string) error {
 }
 
 func (app *Application) Close() error {
-	return app.store.Close()
+	return app.db.Close()
 }

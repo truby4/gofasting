@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT NOT NULL UNIQUE,
     hashed_password TEXT NOT NULL CHECK (length(hashed_password) = 60),
-    created TEXT NOT NULL
+    created TEXT NOT NULL,
+    updated TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
