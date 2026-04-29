@@ -66,6 +66,9 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	flash := h.sessionManager.PopString(r.Context(), "flash")
+	data.Flash = flash
+
 	h.render(w, r, http.StatusOK, "home.tmpl", data)
 }
 
@@ -87,6 +90,8 @@ func (h *Handler) fastStartPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.sessionManager.Put(r.Context(), "flash", "You've started a new fast!")
+
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -99,6 +104,8 @@ func (h *Handler) fastEndPost(w http.ResponseWriter, r *http.Request) {
 		h.serverError(w, r, err)
 		return
 	}
+
+	h.sessionManager.Put(r.Context(), "flash", "Well done, another fast down!")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

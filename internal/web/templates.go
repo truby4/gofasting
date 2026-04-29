@@ -13,6 +13,7 @@ import (
 )
 
 type templateData struct {
+	Flash           string
 	Form            any
 	IsAuthenticated bool
 	Fast            *fasts.Fast

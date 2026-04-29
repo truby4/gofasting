@@ -35,6 +35,8 @@
             class="container py-4"
             style="max-width: 640px"
         >
+            {{with .Flash}} {{template "flash-message" .}}
+            {{end}}
             <main>{{template "main" .}}</main>
 
             {{template "footer" .}}

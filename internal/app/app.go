@@ -1,6 +1,7 @@
 package app
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"log/slog"
 	"net/http"
@@ -37,6 +38,7 @@ func New(level slog.Level) (*Application, error) {
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.Secure = true
 
 	auth := auth.New(db)
 	fasts := fasts.New(db)
@@ -67,15 +69,22 @@ func New(level slog.Level) (*Application, error) {
 
 func (app *Application) Serve(addr string) error {
 	app.Logger.Info("Starting server", "addr", addr)
+
+	tlsConfig := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
+
 	srv := &http.Server{
 		Addr:         addr,
 		Handler:      app.Routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
+		ErrorLog:     slog.NewLogLogger(app.Logger.Handler(), slog.LevelError),
+		TLSConfig:    tlsConfig,
 	}
 
-	return srv.ListenAndServe()
+	return srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 }
 
 func (app *Application) Close() error {
