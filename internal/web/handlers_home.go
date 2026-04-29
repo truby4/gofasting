@@ -33,44 +33,37 @@ func (f *fastStartForm) validateForm() error {
 }
 
 func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
-	userID, isAuthenticated := h.authenticatedUserID(r)
-
-	h.logger.Debug("session check",
-		"userID", userID,
-		"isAuthenticated", isAuthenticated,
-	)
+	userID := h.sessionManager.GetInt(r.Context(), "authenticatedUserID")
 
 	data := h.newTemplateData(r)
 	data.Form = fastStartForm{
 		Goal: 8,
 	}
 
-	if isAuthenticated {
-		fast, err := h.fasts.GetActiveFast(userID)
-		if errors.Is(err, fasts.ErrNoRecord) {
-			err = nil
-		} else if err != nil {
-			h.serverError(w, r, err)
-			return
-		} else {
-			data.Fast = &fast
-		}
+	fast, err := h.fasts.GetActiveFast(userID)
+	if errors.Is(err, fasts.ErrNoRecord) {
+		err = nil
+	} else if err != nil {
+		h.serverError(w, r, err)
+		return
+	} else {
+		data.Fast = &fast
+	}
 
-		fasts, err := h.fasts.GetHistory(userID)
-		if err != nil {
-			h.serverError(w, r, err)
-			return
-		} else {
-			h.logger.Debug("Fasts download successful?")
-			data.Fasts = fasts
-		}
+	fasts, err := h.fasts.GetHistory(userID)
+	if err != nil {
+		h.serverError(w, r, err)
+		return
+	} else {
+		h.logger.Debug("Fasts download successful?")
+		data.Fasts = fasts
 	}
 
 	h.render(w, r, http.StatusOK, "home.tmpl", data)
 }
 
 func (h *Handler) fastStartPost(w http.ResponseWriter, r *http.Request) {
-	userID := h.sessionManager.Get(r.Context(), "authenticatedUserID").(int)
+	userID := h.sessionManager.GetInt(r.Context(), "authenticatedUserID")
 	var form fastStartForm
 
 	err := h.decodePostForm(r, &form)
@@ -93,7 +86,7 @@ func (h *Handler) fastStartPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) fastEndPost(w http.ResponseWriter, r *http.Request) {
-	userID := h.sessionManager.Get(r.Context(), "authenticatedUserID").(int)
+	userID := h.sessionManager.GetInt(r.Context(), "authenticatedUserID")
 	r.Body = http.MaxBytesReader(w, r.Body, 1024)
 
 	err := h.fasts.End(userID)

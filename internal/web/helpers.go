@@ -26,10 +26,10 @@ func (h *Handler) decodePostForm(r *http.Request, dst any) error {
 }
 
 func (h *Handler) isAuthenticated(r *http.Request) bool {
-	return h.sessionManager.Exists(r.Context(), "authenticatedUserID")
-}
+	isAuthenticated, ok := r.Context().Value(isAuthenticatedContextKey).(bool)
+	if !ok {
+		return false
+	}
 
-func (h *Handler) authenticatedUserID(r *http.Request) (int, bool) {
-	userID, ok := h.sessionManager.Get(r.Context(), "authenticatedUserID").(int)
-	return userID, ok
+	return isAuthenticated
 }

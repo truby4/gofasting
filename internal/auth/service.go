@@ -67,3 +67,7 @@ func (s *Service) Register(email, password string) error {
 
 	return s.store.create(email, hashedPassword)
 }
+
+func (s *Service) Exists(userID int) (bool, error) {
+	return s.store.exists(userID)
+}
