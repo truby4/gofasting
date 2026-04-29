@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/truby4/gofasting/ui"
 )
 
 func (h *Handler) Routes() http.Handler {
@@ -13,6 +14,8 @@ func (h *Handler) Routes() http.Handler {
 		preventCSRFMiddleware,
 		h.authConfirmMiddleware,
 	)
+
+	r.Handle("/static/*", http.FileServerFS(ui.Files))
 
 	r.With(h.authProtectMiddleware).Get("/", h.home)
 
