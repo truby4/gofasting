@@ -1,3 +1,20 @@
 {{define "footer"}}
-<p>Footer visibile</p>
+<footer class="mt-5 py-4 border-top">
+    <div
+        class="d-flex justify-content-between align-items-center flex-wrap gap-2"
+    >
+        <div class="d-flex align-items-center gap-2">
+            <img src="/static/img/logo.png" alt="Logo" width="28" />
+            <span class="text-muted small">© 2026 Fasting</span>
+        </div>
+
+        <div class="d-flex gap-3 small">
+            <a href="/about" class="text-muted text-decoration-none">About</a>
+            <a href="/privacy" class="text-muted text-decoration-none"
+                >Privacy</a
+            >
+            <a href="/terms" class="text-muted text-decoration-none">Terms</a>
+        </div>
+    </div>
+</footer>
 {{end}}

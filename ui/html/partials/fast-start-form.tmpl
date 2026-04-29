@@ -1,0 +1,52 @@
+{{define "fast-start-form"}}
+<section class="py-3">
+    <h1 class="display-6 mb-2">No active fast</h1>
+    <form action="/fast/start" method="POST" class="max-w-sm space-y-5">
+        <p class="lead mb-4">
+            Start a new fast to begin tracking your progress.
+        </p>
+
+        <div class="mb-3">
+            <label for="goal-hours" class="form-label">Goal</label>
+            <div class="input-group">
+                <input
+                    type="number"
+                    class="form-control {{with .Form.FieldErrors.goal}}is-invalid{{end}}"
+                    id="goal-hours"
+                    value="{{.Form.Goal}}"
+                    name="goal_hours"
+                />
+                <span class="input-group-text">hours</span>
+                {{with .Form.FieldErrors.goal}}
+                <div class="invalid-feedback">{{.}}</div>
+                {{end}}
+            </div>
+        </div>
+
+        <button class="btn btn-primary px-3 mb-5">Start fast</button>
+    </form>
+
+    <ul class="list-group mb-3">
+        <li
+            class="list-group-item d-flex justify-content-between align-items-center"
+        >
+            <span>Last fast</span>
+            <span class="text-muted">16h · Yesterday</span>
+        </li>
+
+        <li
+            class="list-group-item d-flex justify-content-between align-items-center"
+        >
+            <span>Typical goal</span>
+            <span class="text-muted">16h</span>
+        </li>
+
+        <li
+            class="list-group-item d-flex justify-content-between align-items-center"
+        >
+            <span>Current streak</span>
+            <span class="text-muted">5 days</span>
+        </li>
+    </ul>
+</section>
+{{end}}

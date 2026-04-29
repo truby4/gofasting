@@ -6,11 +6,17 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+	"time"
+
+	"github.com/dustin/go-humanize"
+	"github.com/truby4/gofasting/internal/fasts"
 )
 
 type templateData struct {
 	Form            any
 	IsAuthenticated bool
+	Fast            *fasts.Fast
+	Fasts           []fasts.Fast
 }
 
 func (h *Handler) newTemplateData(r *http.Request) templateData {
@@ -72,4 +78,81 @@ func (h *Handler) render(w http.ResponseWriter, r *http.Request, status int, pag
 	buf.WriteTo(w)
 }
 
-var functions = template.FuncMap{}
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 15:04")
+}
+
+func humanDatePtr(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return humanDate(*t)
+}
+
+func timeAgo(t time.Time) string {
+	return humanize.Time(t)
+}
+
+func goalText(goalSeconds int) string {
+	hours := goalSeconds / 3600
+	if hours == 1 {
+		return "1 hour"
+	}
+	return fmt.Sprintf("%d hours", hours)
+}
+
+func expectedEnd(start time.Time, goalSeconds int) string {
+	end := start.Add(time.Duration(goalSeconds) * time.Second)
+	return humanDate(end)
+}
+func completedDurationText(f fasts.Fast) string {
+	if f.EndTime == nil {
+		return "In progress"
+	}
+	return durationText(int(f.EndTime.Sub(f.StartTime).Seconds()))
+}
+
+func fastDurationText(f fasts.Fast) string {
+	end := time.Now()
+	if f.EndTime != nil {
+		end = *f.EndTime
+	}
+	return durationText(int(end.Sub(f.StartTime).Seconds()))
+}
+
+func fastRangeText(f fasts.Fast) string {
+	if f.EndTime == nil {
+		return fmt.Sprintf("%s → now", humanDate(f.StartTime))
+	}
+	return fmt.Sprintf("%s → %s", humanDate(f.StartTime), humanDate(*f.EndTime))
+}
+
+var functions = template.FuncMap{
+	"humanDate":             humanDate,
+	"humanDatePtr":          humanDatePtr,
+	"timeAgo":               timeAgo,
+	"goalText":              goalText,
+	"expectedEnd":           expectedEnd,
+	"fastDurationText":      fastDurationText,
+	"fastRangeText":         fastRangeText,
+	"completedDurationText": completedDurationText,
+	"durationText":          durationText,
+}
+
+func durationText(seconds int) string {
+	if seconds <= 0 {
+		return "0m"
+	}
+
+	hours := seconds / 3600
+	minutes := (seconds % 3600) / 60
+
+	switch {
+	case hours == 0:
+		return fmt.Sprintf("%dm", minutes)
+	case minutes == 0:
+		return fmt.Sprintf("%dh", hours)
+	default:
+		return fmt.Sprintf("%dh %dm", hours, minutes)
+	}
+}

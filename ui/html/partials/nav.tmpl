@@ -9,6 +9,31 @@
                     width="45"
                 />
             </a>
+            {{if .IsAuthenticated}}
+
+            <form
+                action="/signout"
+                method="POST"
+                class="d-inline"
+            >
+                <button
+                    type="submit"
+                    class="nav-link btn btn-link p-0"
+                >
+                    Logout
+                </button>
+            </form>
+            {{else}}
+            <nav class="nav">
+                <a class="nav-link" href="/signin"
+                    >Sign in</a
+                >
+                <a class="nav-link" href="/signup"
+                    >Create Account</a
+                >
+            </nav>
+
+            {{end}}
         </div>
     </nav>
 </header>

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"log/slog"
 	"os"
 
 	"github.com/truby4/gofasting/internal/app"
@@ -10,9 +11,18 @@ import (
 
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
+	env := flag.String("env", "dev", "environment")
 	flag.Parse()
 
-	app, err := app.New()
+	var level slog.Level
+	switch *env {
+	case "dev":
+		level = slog.LevelDebug
+	default:
+		level = slog.LevelInfo
+	}
+
+	app, err := app.New(level)
 	if err != nil {
 		log.Fatal(err)
 	}

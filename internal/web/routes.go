@@ -19,5 +19,8 @@ func (h *Handler) Routes() http.Handler {
 
 	r.Post("/signout", h.signoutPost)
 
+	r.Post("/fast/start", h.fastStartPost)
+	r.Post("/fast/end", h.fastEndPost)
+
 	return r
 }

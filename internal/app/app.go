@@ -9,40 +9,44 @@ import (
 
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
-	"github.com/go-playground/form/v4"
 	"github.com/truby4/gofasting/internal/api"
 	"github.com/truby4/gofasting/internal/auth"
+	"github.com/truby4/gofasting/internal/fasts"
 	"github.com/truby4/gofasting/internal/web"
 )
 
 type Application struct {
 	Logger         *slog.Logger
-	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
 	db             *sql.DB
-	auth           *auth.Service
 
 	web *web.Handler
 	api *api.Handler
 }
 
-func New() (*Application, error) {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+func New(level slog.Level) (*Application, error) {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: level,
+	}))
 
 	db, err := openDB()
 	if err != nil {
 		return nil, err
 	}
 
-	formDecoder := form.NewDecoder()
-
 	sessionManager := scs.New()
 	sessionManager.Store = sqlite3store.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
 
 	auth := auth.New(db)
+	fasts := fasts.New(db)
 
-	web, err := web.NewHandler(logger, formDecoder, auth, sessionManager)
+	web, err := web.NewHandler(
+		logger,
+		auth,
+		fasts,
+		sessionManager,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +75,7 @@ func (app *Application) Serve(addr string) error {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	err := srv.ListenAndServe()
-	return err
+	return srv.ListenAndServe()
 }
 
 func (app *Application) Close() error {

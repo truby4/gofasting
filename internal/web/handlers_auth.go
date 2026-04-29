@@ -57,8 +57,8 @@ func (h *Handler) signinPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.logger.Debug("Putting id in sessionmanager")
 	h.sessionManager.Put(r.Context(), "authenticatedUserID", id)
-
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 

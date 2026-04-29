@@ -8,8 +8,11 @@ import (
 
 func (app *Application) Routes() http.Handler {
 	r := chi.NewRouter()
-	r.Use(app.recoverPanic)
-	r.Use(app.sessionManager.LoadAndSave)
+	r.Use(commonHeaders,
+		app.recoverPanic,
+		app.sessionManager.LoadAndSave,
+		app.logRequest,
+	)
 
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
