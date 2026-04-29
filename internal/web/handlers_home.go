@@ -66,9 +66,6 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	flash := h.sessionManager.PopString(r.Context(), "flash")
-	data.Flash = flash
-
 	h.render(w, r, http.StatusOK, "home.tmpl", data)
 }
 

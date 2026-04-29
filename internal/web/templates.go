@@ -22,6 +22,7 @@ type templateData struct {
 
 func (h *Handler) newTemplateData(r *http.Request) templateData {
 	return templateData{
+		Flash:           h.sessionManager.PopString(r.Context(), "flash"),
 		IsAuthenticated: h.isAuthenticated(r),
 	}
 }

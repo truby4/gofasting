@@ -9,7 +9,7 @@ import (
 func (h *Handler) Routes() http.Handler {
 	r := chi.NewRouter()
 
-	r.Get("/", h.home)
+	r.With(h.authMiddleware).Get("/", h.home)
 
 	r.Get("/signin", h.signin)
 	r.Post("/signin", h.signinPost)
@@ -19,8 +19,8 @@ func (h *Handler) Routes() http.Handler {
 
 	r.Post("/signout", h.signoutPost)
 
-	r.Post("/fast/start", h.fastStartPost)
-	r.Post("/fast/end", h.fastEndPost)
+	r.With(h.authMiddleware).Post("/fast/start", h.fastStartPost)
+	r.With(h.authMiddleware).Post("/fast/end", h.fastEndPost)
 
 	return r
 }
