@@ -46,7 +46,11 @@
             <div class="invalid-feedback">{{.}}</div>
             {{end}}
         </div>
-
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{.CSRFToken}}"
+        />
         <button
             class="btn btn-primary px-3 my-3"
             type="submit"

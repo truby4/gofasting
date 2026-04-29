@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+	"github.com/justinas/nosurf"
 	"github.com/truby4/gofasting/internal/fasts"
 )
 
@@ -18,12 +19,14 @@ type templateData struct {
 	IsAuthenticated bool
 	Fast            *fasts.Fast
 	Fasts           []fasts.Fast
+	CSRFToken       string
 }
 
 func (h *Handler) newTemplateData(r *http.Request) templateData {
 	return templateData{
 		Flash:           h.sessionManager.PopString(r.Context(), "flash"),
 		IsAuthenticated: h.isAuthenticated(r),
+		CSRFToken:       nosurf.Token(r),
 	}
 }
 

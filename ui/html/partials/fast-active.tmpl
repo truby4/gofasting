@@ -26,6 +26,7 @@
     </ul>
 
     <form action="/fast/end" method="POST">
+    <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
       <button class="btn btn-danger mb-4 px-3" type="submit">End fast now</button>
     </form>
 </section>

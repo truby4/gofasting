@@ -68,7 +68,11 @@
                 Keep me signed in
             </label>
         </div>
-
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{.CSRFToken}}"
+        />
         <button
             class="btn btn-primary px-3 my-3"
             type="submit"

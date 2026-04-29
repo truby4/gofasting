@@ -16,6 +16,11 @@
                 method="POST"
                 class="d-inline"
             >
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{.CSRFToken}}"
+                />
                 <button
                     type="submit"
                     class="nav-link btn btn-link"

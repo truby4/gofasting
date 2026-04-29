@@ -9,6 +9,8 @@ import (
 func (h *Handler) Routes() http.Handler {
 	r := chi.NewRouter()
 
+	r.Use(preventCSRF)
+
 	r.With(h.authMiddleware).Get("/", h.home)
 
 	r.Get("/signin", h.signin)
